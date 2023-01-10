@@ -2,6 +2,7 @@
 
 # Run the playbook using:
 # ansible-playbook -i localhost, r-ci.yml
+{% raw %}
 
 - name: Run the playbook to check the package
   hosts: localhost
@@ -42,3 +43,5 @@
   - name: Display the package build log
     ansible.builtin.debug:
       msg: "{{ PKG_BUILD_LOG.stdout_lines }}"
+
+{% endraw %}
