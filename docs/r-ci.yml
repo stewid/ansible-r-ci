@@ -1,0 +1,44 @@
+---
+
+# Run the playbook using:
+# ansible-playbook -i localhost, r-ci.yml
+
+- name: Run the playbook to check the package
+  hosts: localhost
+  connection: local
+
+  tasks:
+  - name: Determine the package name from the DESCRIPTION file
+    ansible.builtin.shell:
+      cmd: "grep -i ^package DESCRIPTION | cut -d : -d ' ' -f 2 | tr -d '\r'"
+    register: PKG_NAME
+    changed_when: false
+
+  - name: Determine the package version from the DESCRIPTION file
+    ansible.builtin.shell:
+      cmd: "grep -i ^version DESCRIPTION | cut -d : -d ' ' -f 2 | tr -d '\r'"
+    register: PKG_VERSION
+    changed_when: false
+
+  - name: Determine the name of the built package
+    ansible.builtin.shell:
+      cmd: "echo {{ PKG_NAME.stdout }}_{{ PKG_VERSION.stdout }}.tar.gz"
+    register: PKG_TAR
+    changed_when: false
+
+  - name: Display package information
+    ansible.builtin.debug:
+      msg:
+      - "Package name: {{ PKG_NAME.stdout }}"
+      - "Package version: {{ PKG_VERSION.stdout }}"
+      - "Package file: {{ PKG_TAR.stdout }}"
+
+  - name: Build the package
+    ansible.builtin.shell:
+      cmd: "R CMD build --no-manual --compact-vignettes=both ."
+    register: PKG_BUILD_LOG
+    changed_when: false
+
+  - name: Display the package build log
+    ansible.builtin.debug:
+      msg: "{{ PKG_BUILD_LOG.stdout_lines }}"
