@@ -17,7 +17,7 @@
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
-    register: PKG_NAME
+    register: pkg_name
     changed_when: false
 
   - name: Determine the package version from the DESCRIPTION file
@@ -27,30 +27,30 @@
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
-    register: PKG_VERSION
+    register: pkg_version
     changed_when: false
 
   - name: Determine the name of the built package
     ansible.builtin.command:
-      cmd: "echo {{ PKG_NAME.stdout }}_{{ PKG_VERSION.stdout }}.tar.gz"
-    register: PKG_TAR
+      cmd: "echo {{ pkg_name.stdout }}_{{ pkg_version.stdout }}.tar.gz"
+    register: pkg_tar
     changed_when: false
 
   - name: Display package information
     ansible.builtin.debug:
       msg:
-      - "Package name: {{ PKG_NAME.stdout }}"
-      - "Package version: {{ PKG_VERSION.stdout }}"
-      - "Package file: {{ PKG_TAR.stdout }}"
+        - "Package name: {{ pkg_name.stdout }}"
+        - "Package version: {{ pkg_version.stdout }}"
+        - "Package file: {{ pkg_tar.stdout }}"
 
   - name: Build the package
     ansible.builtin.command:
       cmd: "R CMD build --no-manual --compact-vignettes=both ."
-    register: PKG_BUILD_LOG
+    register: pkg_build_log
     changed_when: false
 
   - name: Display the package build log
     ansible.builtin.debug:
-      msg: "{{ PKG_BUILD_LOG.stdout_lines }}"
+      msg: "{{ pkg_build_log.stdout_lines }}"
 
 # {% endraw %}
