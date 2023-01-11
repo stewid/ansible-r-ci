@@ -14,9 +14,9 @@
     ansible.builtin.shell:
       cmd: >
         Rscript
-        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) {''})"
+        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) NULL)"
         -e "cat(x)"
-        -e "quit(save = 'no', status = nchar(x[1]) == 0)"
+        -e "quit(save = 'no', status = is.null(x))"
     register: PKG_NAME
     changed_when: false
 
@@ -24,9 +24,9 @@
     ansible.builtin.shell:
       cmd: >
         Rscript
-        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) {''})"
+        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) NULL)"
         -e "cat(x)"
-        -e "quit(save = 'no', status = nchar(x[1]) == 0)"
+        -e "quit(save = 'no', status = is.null(x))"
     register: PKG_VERSION
     changed_when: false
 
