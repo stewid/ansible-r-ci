@@ -12,13 +12,13 @@
   tasks:
   - name: Determine the package name from the DESCRIPTION file
     ansible.builtin.shell:
-      cmd: "grep -i ^package DESCRIPTION | cut -d : -d ' ' -f 2 | tr -d '\r'"
+      cmd: "Rscript -e \"cat(read.dcf('DESCRIPTION')[, 'Package'])\""
     register: PKG_NAME
     changed_when: false
 
   - name: Determine the package version from the DESCRIPTION file
     ansible.builtin.shell:
-      cmd: "grep -i ^version DESCRIPTION | cut -d : -d ' ' -f 2 | tr -d '\r'"
+      cmd: "Rscript -e \"cat(read.dcf('DESCRIPTION')[, 'Version'])\""
     register: PKG_VERSION
     changed_when: false
 
