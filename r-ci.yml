@@ -53,4 +53,16 @@
     ansible.builtin.debug:
       msg: "{{ pkg_build_log.stdout_lines }}"
 
+  - name: Check the package
+    ansible.builtin.command:
+      cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_tar.stdout }}"
+    environment:
+      _R_CHECK_CRAN_INCOMING_: FALSE
+    register: pkg_check_log
+    changed_when: false
+
+  - name: Display the package check log
+    ansible.builtin.debug:
+      msg: "{{ pkg_check_log.stdout_lines }}"
+
 # {% endraw %}
