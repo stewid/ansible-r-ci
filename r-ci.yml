@@ -71,6 +71,6 @@
   - name: Display the package check log
     ansible.builtin.debug:
       msg: "{{ pkg_check_log.stdout_lines }}"
-    failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
+    failed_when: pkg_check.rc != 0 or "NOTE" in pkg_check_log.stdout
 
 # {% endraw %}
