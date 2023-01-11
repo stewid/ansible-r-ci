@@ -12,13 +12,21 @@
   tasks:
   - name: Determine the package name from the DESCRIPTION file
     ansible.builtin.shell:
-      cmd: "Rscript -e \"cat(read.dcf('DESCRIPTION')[, 'Package'])\""
+      cmd: >
+        Rscript
+        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) {''})"
+        -e "cat(x)"
+        -e "quit(save = 'no', status = nchar(x[1]) == 0)"
     register: PKG_NAME
     changed_when: false
 
   - name: Determine the package version from the DESCRIPTION file
     ansible.builtin.shell:
-      cmd: "Rscript -e \"cat(read.dcf('DESCRIPTION')[, 'Version'])\""
+      cmd: >
+        Rscript
+        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) {''})"
+        -e "cat(x)"
+        -e "quit(save = 'no', status = nchar(x[1]) == 0)"
     register: PKG_VERSION
     changed_when: false
 
