@@ -13,20 +13,20 @@
   - name: Determine the package name from the DESCRIPTION file
     ansible.builtin.shell:
       cmd: >
-        Rscript
+        Rscript --vanilla
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) NULL)"
+        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
-        -e "quit(save = 'no', status = is.null(x))"
     register: PKG_NAME
     changed_when: false
 
   - name: Determine the package version from the DESCRIPTION file
     ansible.builtin.shell:
       cmd: >
-        Rscript
+        Rscript --vanilla
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) NULL)"
+        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
-        -e "quit(save = 'no', status = is.null(x))"
     register: PKG_VERSION
     changed_when: false
 
