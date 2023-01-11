@@ -3,7 +3,7 @@
 # Run the playbook using:
 # ansible-playbook -i localhost, r-ci.yml
 
-# {% raw %}
+# Use raw to disable tag processing {% raw %}
 
 - name: Run the playbook to check the package
   hosts: localhost
