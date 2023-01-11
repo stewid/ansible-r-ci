@@ -57,7 +57,7 @@
     ansible.builtin.command:
       cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_tar.stdout }}"
     environment:
-      _R_CHECK_CRAN_INCOMING_: FALSE
+      _R_CHECK_CRAN_INCOMING_: false
     register: pkg_check_log
     changed_when: false
 
