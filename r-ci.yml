@@ -17,6 +17,7 @@
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
+      chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_name
     changed_when: false
 
@@ -27,6 +28,7 @@
         -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
+      chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_version
     changed_when: false
 
@@ -46,6 +48,7 @@
   - name: Build the package
     ansible.builtin.command:
       cmd: "R CMD build --no-manual --compact-vignettes=both ."
+      chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_build_log
     changed_when: false
 
@@ -56,6 +59,7 @@
   - name: Check the package
     ansible.builtin.command:
       cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_tar.stdout }}"
+      chdir: "{{ lookup('env', 'PWD') }}"
     environment:
       _R_CHECK_CRAN_INCOMING_: false
     register: pkg_check
@@ -65,6 +69,7 @@
   - name: Read the package check log
     ansible.builtin.command:
       cmd: "cat {{ pkg_name.stdout }}.Rcheck/00check.log"
+      chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_check_log
     changed_when: false
 
