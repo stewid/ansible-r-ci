@@ -20,6 +20,7 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_name
     changed_when: false
+    become: false
 
   - name: Determine the package version from the DESCRIPTION file
     ansible.builtin.command:
@@ -31,12 +32,14 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_version
     changed_when: false
+    become: false
 
   - name: Determine the name of the built package
     ansible.builtin.command:
       cmd: "echo {{ pkg_name.stdout }}_{{ pkg_version.stdout }}.tar.gz"
     register: pkg_tar
     changed_when: false
+    become: false
 
   - name: Display package information
     ansible.builtin.debug:
@@ -44,6 +47,7 @@
         - "Package name: {{ pkg_name.stdout }}"
         - "Package version: {{ pkg_version.stdout }}"
         - "Package file: {{ pkg_tar.stdout }}"
+    become: false
 
   - name: Build the package
     ansible.builtin.command:
@@ -51,10 +55,12 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_build_log
     changed_when: false
+    become: false
 
   - name: Display the package build log
     ansible.builtin.debug:
       msg: "{{ pkg_build_log.stdout_lines }}"
+    become: false
 
   - name: Check the package
     ansible.builtin.command:
@@ -65,6 +71,7 @@
     register: pkg_check
     changed_when: false
     failed_when: false
+    become: false
 
   - name: Read the package check log
     ansible.builtin.command:
@@ -77,5 +84,6 @@
     ansible.builtin.debug:
       msg: "{{ pkg_check_log.stdout_lines }}"
     failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
+    become: false
 
 # {% endraw %}
