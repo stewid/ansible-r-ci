@@ -14,7 +14,7 @@
     ansible.builtin.package:
       name: R
       state: present
-    become: yes
+    become: true
 
   - name: Determine the package name from the DESCRIPTION file
     ansible.builtin.command:
