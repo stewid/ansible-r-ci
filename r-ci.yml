@@ -26,6 +26,15 @@
     become: true
     when: is_r_installed.rc != 0
 
+  - name: Setup Copr to install binary R packages
+    ansible.builtin.command:
+      cmd: |
+        dnf --assumeyes install "dnf-command(copr)"
+        dnf --assumeyes copr enable iucar/cran
+        dnf --assumeyes install R-CoprManager
+    become: true
+    when: is_r_installed.rc != 0
+
   - name: Determine the package name from the DESCRIPTION file
     ansible.builtin.command:
       cmd: >
