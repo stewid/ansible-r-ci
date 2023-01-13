@@ -8,6 +8,7 @@
 - name: Run the playbook to check the package
   hosts: localhost
   connection: local
+  gather_facts: no
 
   tasks:
   - name: Ensure R is present
