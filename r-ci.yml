@@ -28,7 +28,9 @@
 
   - name: Enable the iucar/cran Copr repo
     ansible.builtin.command:
-      cmd: dnf --assumeyes copr enable iucar/cran
+      cmd: |
+        dnf --assumeyes install 'dnf-command(copr)'
+        dnf --assumeyes copr enable iucar/cran
     become: true
     when: is_r_installed.rc != 0
 
