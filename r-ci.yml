@@ -8,7 +8,7 @@
 - name: Run the playbook to check the package
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
 
   tasks:
   - name: Check if R is installed
@@ -83,7 +83,7 @@
       cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_tar.stdout }}"
       chdir: "{{ lookup('env', 'PWD') }}"
     environment:
-      _R_CHECK_CRAN_INCOMING_: false
+      _R_CHECK_CRAN_INCOMING_: "FALSE"
     register: pkg_check
     changed_when: false
     failed_when: false
