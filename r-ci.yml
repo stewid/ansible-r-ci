@@ -110,6 +110,7 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_check_log
     changed_when: false
+    become: false
 
   - name: Display the package check log
     ansible.builtin.debug:
