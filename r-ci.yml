@@ -86,11 +86,13 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     register: pkg_build_log
     changed_when: false
+    failed_when: false
     become: false
 
   - name: Display the package build log
     ansible.builtin.debug:
       msg: "{{ pkg_build_log.stdout_lines }}"
+    failed_when: pkg_build_log.rc != 0
     become: false
 
   - name: Check the package
