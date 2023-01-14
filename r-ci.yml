@@ -105,4 +105,39 @@
     failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
     become: false
 
+  - name: Check if lintr is installed
+    ansible.builtin.command:
+      cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'lintr'))"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    register: is_lintr_installed
+    changed_when: false
+    become: false
+
+  - name: Install lintr
+    ansible.builtin.command:
+      cmd: Rscript -e "install.packages('lintr')"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    become: false
+    when: is_lintr_installed.stdout == "FALSE"
+
+  - name: Static code analysis of R code using lintr
+    ansible.builtin.command:
+      cmd: >
+        Rscript
+        -e "library(lintr)"
+        -e "result <- lint_package()"
+        -e "print(result)"
+        -e "quit(save = 'no', status = length(result) > 0)"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    register: pkg_lintr_log
+    changed_when: false
+    failed_when: false
+    become: false
+
+  - name: Display the package lintr log
+    ansible.builtin.debug:
+      msg: "{{ pkg_lintr_log.stdout_lines }}"
+    failed_when: pkg_lintr_log.rc != 0
+    become: false
+
 # {% endraw %}
