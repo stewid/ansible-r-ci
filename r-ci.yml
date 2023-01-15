@@ -140,4 +140,25 @@
     failed_when: pkg_lintr_log.rc != 0
     become: false
 
+  - name: Check if covr is installed
+    ansible.builtin.command:
+      cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'covr'))"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    register: is_covr_installed
+    changed_when: false
+    become: false
+
+  - name: Install covr
+    ansible.builtin.command:
+      cmd: Rscript -e "install.packages('covr')"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    become: false
+    when: is_covr_installed.stdout == "FALSE"
+
+  - name: Run code coverage
+    ansible.builtin.command:
+      cmd: Rscript -e "covr::codecov()"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    become: false
+
 # {% endraw %}
