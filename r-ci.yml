@@ -115,7 +115,7 @@
 
   - name: Install lintr
     ansible.builtin.command:
-      cmd: Rscript -e "install.packages('lintr')"
+      cmd: Rscript -e "install.packages('lintr', repos = 'https://cloud.r-project.org')"
       chdir: "{{ lookup('env', 'PWD') }}"
     become: false
     when: is_lintr_installed.stdout == "FALSE"
@@ -150,7 +150,7 @@
 
   - name: Install covr
     ansible.builtin.command:
-      cmd: Rscript -e "install.packages('covr')"
+      cmd: Rscript -e "install.packages('covr', repos = 'https://cloud.r-project.org')"
       chdir: "{{ lookup('env', 'PWD') }}"
     become: false
     when: is_covr_installed.stdout == "FALSE"
