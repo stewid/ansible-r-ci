@@ -151,6 +151,7 @@
     ansible.builtin.command:
       cmd: Rscript -e "covr::codecov()"
       chdir: "{{ lookup('env', 'PWD') }}"
+    changed_when: false
     become: false
 
 # {% endraw %}
