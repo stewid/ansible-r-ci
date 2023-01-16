@@ -86,23 +86,15 @@
       chdir: "{{ lookup('env', 'PWD') }}"
     environment:
       _R_CHECK_CRAN_INCOMING_: "FALSE"
-    register: pkg_check
+    register: pkg_check_log
     changed_when: false
     failed_when: false
     become: false
 
-  - name: Read the package check log
-    ansible.builtin.command:
-      cmd: "cat {{ pkg_name.stdout }}.Rcheck/00check.log"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_check_log
-    changed_when: false
-    become: false
-
   - name: Display the package check log
     ansible.builtin.debug:
-      msg: "{{ pkg_check_log.stdout_lines }}"
-    failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
+      msg: "{{ pkg_check_log.stdout_lines + pkg_check_log.stderr_lines }}"
+    failed_when: pkg_check_log.rc != 0 or "WARNING" in pkg_check_log.stdout
     become: false
 
   - name: Check if lintr is installed
