@@ -76,7 +76,7 @@
 
   - name: Display the package build log
     ansible.builtin.debug:
-      msg: "{{ pkg_build_log.stdout_lines }}"
+      msg: "{{ pkg_build_log.stdout_lines + pkg_build_log.stderr_lines }}"
     failed_when: pkg_build_log.rc != 0
     become: false
 
