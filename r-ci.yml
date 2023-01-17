@@ -65,6 +65,24 @@
     changed_when: false
     become: false
 
+  - name: Install package dependencies
+    ansible.builtin.command:
+      cmd: >
+        Rscript
+        -e "fields <- c('Imports', 'Depends', 'Suggests')"
+        -e "x <- tryCatch(read.dcf('DESCRIPTION', fields), error = function(e) NULL)"
+        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
+        -e "x <- trimws(unlist(strsplit(as.character(x), ',')))"
+        -e "x <- sapply(strsplit(x, ' '), '[[', 1)"
+        -e "x <- x[x != 'R']"
+        -e "x <- x[!(x %in% installed.packages()[, 1])]"
+        -e "if (length(x)) install.packages(x, repos = 'https://cloud.r-project.org')"
+        -e "cat(length(x) > 0)"
+      chdir: "{{ lookup('env', 'PWD') }}"
+    register: pkg_dependencies
+    changed_when: "'TRUE' in pkg_dependencies.stdout"
+    become: false
+
   - name: Build the package
     ansible.builtin.command:
       cmd: "R CMD build --no-manual --compact-vignettes=both ."
