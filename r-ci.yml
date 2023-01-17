@@ -45,7 +45,7 @@
     ansible.builtin.command:
       cmd: >
         Rscript --vanilla
-        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Package'], error = function(e) NULL)"
+        -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Package'), error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
       chdir: "{{ lookup('env', 'PWD') }}"
@@ -57,7 +57,7 @@
     ansible.builtin.command:
       cmd: >
         Rscript --vanilla
-        -e "x <- tryCatch(read.dcf('DESCRIPTION')[, 'Version'], error = function(e) NULL)"
+        -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Version'), error = function(e) NULL)"
         -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
         -e "cat(x)"
       chdir: "{{ lookup('env', 'PWD') }}"
