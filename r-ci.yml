@@ -16,182 +16,182 @@
   gather_facts: false
 
   tasks:
-  - name: Check if R is installed
-    ansible.builtin.command:
-      cmd: command -v R
-    register: is_r_installed
-    changed_when: false
-    failed_when: false
-    become: false
+    - name: Check if R is installed
+      ansible.builtin.command:
+        cmd: command -v R
+      register: is_r_installed
+      changed_when: false
+      failed_when: false
+      become: false
 
-  - name: Install R
-    ansible.builtin.dnf:
-      name:
-        - devscripts-checkbashisms
-        - dnf-command(copr)
-        - R
-        - tidy
-      state: present
-    become: true
-    when: is_r_installed.rc != 0
+    - name: Install R
+      ansible.builtin.dnf:
+        name:
+          - devscripts-checkbashisms
+          - dnf-command(copr)
+          - R
+          - tidy
+        state: present
+      become: true
+      when: is_r_installed.rc != 0
 
-  - name: Install system requirements
-    ansible.builtin.dnf:
-      name: "{{ sysreqs.split(',') }}"
-      state: present
-    become: true
-    when: sysreqs is defined
+    - name: Install system requirements
+      ansible.builtin.dnf:
+        name: "{{ sysreqs.split(',') }}"
+        state: present
+      become: true
+      when: sysreqs is defined
 
-  - name: Enable the iucar/cran Copr repo
-    ansible.builtin.command:
-      cmd: dnf --assumeyes copr enable iucar/cran
-    become: true
-    when: is_r_installed.rc != 0
+    - name: Enable the iucar/cran Copr repo
+      ansible.builtin.command:
+        cmd: dnf --assumeyes copr enable iucar/cran
+      become: true
+      when: is_r_installed.rc != 0
 
-  - name: Setup Copr to install binary R packages
-    ansible.builtin.dnf:
-      name: R-CoprManager
-      state: present
-    become: true
-    when: is_r_installed.rc != 0
+    - name: Setup Copr to install binary R packages
+      ansible.builtin.dnf:
+        name: R-CoprManager
+        state: present
+      become: true
+      when: is_r_installed.rc != 0
 
-  - name: Determine the package name from the DESCRIPTION file
-    ansible.builtin.command:
-      cmd: >
-        Rscript --vanilla
-        -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Package'), error = function(e) NULL)"
-        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
-        -e "cat(x)"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_name
-    changed_when: false
-    become: false
+    - name: Determine the package name from the DESCRIPTION file
+      ansible.builtin.command:
+        cmd: >
+          Rscript --vanilla
+          -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Package'), error = function(e) NULL)"
+          -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
+          -e "cat(x)"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_name
+      changed_when: false
+      become: false
 
-  - name: Determine the package version from the DESCRIPTION file
-    ansible.builtin.command:
-      cmd: >
-        Rscript --vanilla
-        -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Version'), error = function(e) NULL)"
-        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
-        -e "cat(x)"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_version
-    changed_when: false
-    become: false
+    - name: Determine the package version from the DESCRIPTION file
+      ansible.builtin.command:
+        cmd: >
+          Rscript --vanilla
+          -e "x <- tryCatch(read.dcf('DESCRIPTION', 'Version'), error = function(e) NULL)"
+          -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
+          -e "cat(x)"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_version
+      changed_when: false
+      become: false
 
-  - name: Install package dependencies
-    ansible.builtin.command:
-      cmd: >
-        Rscript
-        -e "fields <- c('Imports', 'Depends', 'Suggests')"
-        -e "x <- tryCatch(read.dcf('DESCRIPTION', fields), error = function(e) NULL)"
-        -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
-        -e "x <- trimws(unlist(strsplit(as.character(x), ',')))"
-        -e "x <- vapply(strsplit(x, ' '), '[[', character(1), 1)"
-        -e "x <- unique(x[x != 'R'])"
-        -e "x <- x[!(x %in% installed.packages()[, 1])]"
-        -e "if (length(x)) install.packages(x, repos = 'https://cloud.r-project.org')"
-        -e "cat(length(x) > 0)"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_dependencies
-    changed_when: "'TRUE' in pkg_dependencies.stdout"
-    become: false
+    - name: Install package dependencies
+      ansible.builtin.command:
+        cmd: >
+          Rscript
+          -e "fields <- c('Imports', 'Depends', 'Suggests')"
+          -e "x <- tryCatch(read.dcf('DESCRIPTION', fields), error = function(e) NULL)"
+          -e "if (is.null(x)) quit(save = 'no', status = 1, runLast = FALSE)"
+          -e "x <- trimws(unlist(strsplit(as.character(x), ',')))"
+          -e "x <- vapply(strsplit(x, ' '), '[[', character(1), 1)"
+          -e "x <- unique(x[x != 'R'])"
+          -e "x <- x[!(x %in% installed.packages()[, 1])]"
+          -e "if (length(x)) install.packages(x, repos = 'https://cloud.r-project.org')"
+          -e "cat(length(x) > 0)"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_dependencies
+      changed_when: "'TRUE' in pkg_dependencies.stdout"
+      become: false
 
-  - name: Build the package
-    ansible.builtin.command:
-      cmd: "R CMD build --no-manual --compact-vignettes=both ."
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_build_log
-    changed_when: false
-    failed_when: false
-    become: false
+    - name: Build the package
+      ansible.builtin.command:
+        cmd: "R CMD build --no-manual --compact-vignettes=both ."
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_build_log
+      changed_when: false
+      failed_when: false
+      become: false
 
-  - name: Display the package build log
-    ansible.builtin.debug:
-      msg: "{{ pkg_build_log.stdout_lines + pkg_build_log.stderr_lines }}"
-    failed_when: pkg_build_log.rc != 0
-    become: false
+    - name: Display the package build log
+      ansible.builtin.debug:
+        msg: "{{ pkg_build_log.stdout_lines + pkg_build_log.stderr_lines }}"
+      failed_when: pkg_build_log.rc != 0
+      become: false
 
-  - name: Check the package
-    ansible.builtin.command:
-      cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_name.stdout }}_{{ pkg_version.stdout }}.tar.gz"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    environment:
-      _R_CHECK_CRAN_INCOMING_: "FALSE"
-    register: pkg_check
-    changed_when: false
-    failed_when: false
-    become: false
+    - name: Check the package
+      ansible.builtin.command:
+        cmd: "R CMD check --no-stop-on-test-error --as-cran {{ pkg_name.stdout }}_{{ pkg_version.stdout }}.tar.gz"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      environment:
+        _R_CHECK_CRAN_INCOMING_: "FALSE"
+      register: pkg_check
+      changed_when: false
+      failed_when: false
+      become: false
 
-  - name: Read the package check log
-    ansible.builtin.command:
-      cmd: "cat {{ pkg_name.stdout }}.Rcheck/00check.log"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_check_log
-    changed_when: false
-    become: false
+    - name: Read the package check log
+      ansible.builtin.command:
+        cmd: "cat {{ pkg_name.stdout }}.Rcheck/00check.log"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_check_log
+      changed_when: false
+      become: false
 
-  - name: Display the package check log
-    ansible.builtin.debug:
-      msg: "{{ pkg_check_log.stdout_lines }}"
-    failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
-    become: false
+    - name: Display the package check log
+      ansible.builtin.debug:
+        msg: "{{ pkg_check_log.stdout_lines }}"
+      failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
+      become: false
 
-  - name: Check if lintr is installed
-    ansible.builtin.command:
-      cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'lintr'))"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: is_lintr_installed
-    changed_when: false
-    become: false
+    - name: Check if lintr is installed
+      ansible.builtin.command:
+        cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'lintr'))"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: is_lintr_installed
+      changed_when: false
+      become: false
 
-  - name: Install lintr
-    ansible.builtin.command:
-      cmd: Rscript -e "install.packages('lintr', repos = 'https://cloud.r-project.org')"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    become: false
-    when: is_lintr_installed.stdout == "FALSE"
+    - name: Install lintr
+      ansible.builtin.command:
+        cmd: Rscript -e "install.packages('lintr', repos = 'https://cloud.r-project.org')"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      become: false
+      when: is_lintr_installed.stdout == "FALSE"
 
-  - name: Static code analysis of R code using lintr
-    ansible.builtin.command:
-      cmd: >
-        Rscript
-        -e "library(lintr)"
-        -e "result <- lint_package()"
-        -e "print(result)"
-        -e "quit(save = 'no', status = length(result) > 0)"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: pkg_lintr_log
-    changed_when: false
-    failed_when: false
-    become: false
+    - name: Static code analysis of R code using lintr
+      ansible.builtin.command:
+        cmd: >
+          Rscript
+          -e "library(lintr)"
+          -e "result <- lint_package()"
+          -e "print(result)"
+          -e "quit(save = 'no', status = length(result) > 0)"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: pkg_lintr_log
+      changed_when: false
+      failed_when: false
+      become: false
 
-  - name: Display the package lintr log
-    ansible.builtin.debug:
-      msg: "{{ pkg_lintr_log.stdout_lines }}"
-    failed_when: pkg_lintr_log.rc != 0
-    become: false
+    - name: Display the package lintr log
+      ansible.builtin.debug:
+        msg: "{{ pkg_lintr_log.stdout_lines }}"
+      failed_when: pkg_lintr_log.rc != 0
+      become: false
 
-  - name: Check if covr is installed
-    ansible.builtin.command:
-      cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'covr'))"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    register: is_covr_installed
-    changed_when: false
-    become: false
+    - name: Check if covr is installed
+      ansible.builtin.command:
+        cmd: Rscript -e "cat(any(installed.packages()[, 1] == 'covr'))"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      register: is_covr_installed
+      changed_when: false
+      become: false
 
-  - name: Install covr
-    ansible.builtin.command:
-      cmd: Rscript -e "install.packages('covr', repos = 'https://cloud.r-project.org')"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    become: false
-    when: is_covr_installed.stdout == "FALSE"
+    - name: Install covr
+      ansible.builtin.command:
+        cmd: Rscript -e "install.packages('covr', repos = 'https://cloud.r-project.org')"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      become: false
+      when: is_covr_installed.stdout == "FALSE"
 
-  - name: Run code coverage
-    ansible.builtin.command:
-      cmd: Rscript -e "covr::codecov()"
-      chdir: "{{ lookup('env', 'PWD') }}"
-    changed_when: false
-    become: false
+    - name: Run code coverage
+      ansible.builtin.command:
+        cmd: Rscript -e "covr::codecov()"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      changed_when: false
+      become: false
 
 # {% endraw %}
