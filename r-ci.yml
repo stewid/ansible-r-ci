@@ -14,6 +14,8 @@
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    r_ci_lintr: true
 
   tasks:
     - name: Check if R is installed
@@ -144,13 +146,14 @@
       register: is_lintr_installed
       changed_when: false
       become: false
+      when: r_ci_lintr | bool
 
     - name: Install lintr
       ansible.builtin.command:
         cmd: Rscript -e "install.packages('lintr', repos = 'https://cloud.r-project.org')"
         chdir: "{{ lookup('env', 'PWD') }}"
       become: false
-      when: is_lintr_installed.stdout == "FALSE"
+      when: r_ci_lintr | bool and is_lintr_installed.stdout == "FALSE"
 
     - name: Static code analysis of R code using lintr
       ansible.builtin.command:
@@ -165,12 +168,14 @@
       changed_when: false
       failed_when: false
       become: false
+      when: r_ci_lintr | bool
 
     - name: Display the package lintr log
       ansible.builtin.debug:
         msg: "{{ pkg_lintr_log.stdout_lines }}"
       failed_when: pkg_lintr_log.rc != 0
       become: false
+      when: r_ci_lintr | bool
 
     - name: Check if covr is installed
       ansible.builtin.command:
@@ -179,13 +184,14 @@
       register: is_covr_installed
       changed_when: false
       become: false
+      when: r_ci_covr is defined
 
     - name: Install covr
       ansible.builtin.command:
         cmd: Rscript -e "install.packages('covr', repos = 'https://cloud.r-project.org')"
         chdir: "{{ lookup('env', 'PWD') }}"
       become: false
-      when: is_covr_installed.stdout == "FALSE"
+      when: r_ci_covr is defined and is_covr_installed.stdout == "FALSE"
 
     - name: Run code coverage
       ansible.builtin.command:
@@ -193,5 +199,6 @@
         chdir: "{{ lookup('env', 'PWD') }}"
       changed_when: false
       become: false
+      when: r_ci_covr is defined
 
 # {% endraw %}
