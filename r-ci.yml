@@ -27,8 +27,10 @@
   - name: Install R
     ansible.builtin.dnf:
       name:
+        - devscripts-checkbashisms
         - dnf-command(copr)
         - R
+        - tidy
       state: present
     become: true
     when: is_r_installed.rc != 0
