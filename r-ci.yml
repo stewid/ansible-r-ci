@@ -8,6 +8,17 @@
 # Example:
 # ansible-playbook -i localhost, --extra-vars "sysreqs=gdal-devel,geos-devel,proj-devel,sqlite-devel" r-ci.yml
 
+# Use the 'r_ci_covr' variable to run covr on a package and specify
+# the target for the code coverage report.
+# Valid targets are:
+#   - azure: output the result so it is available on Azure Pipelines
+#   - codecov: upload the result to codecov.io
+#   - coveralls: upload the result to coveralls
+#   - gitlab:  create report for GitLab
+#   - standalone: output the result 'covr.html'
+# Example, run code coverage and output the result to 'covr.html':
+# ansible-playbook -i localhost, --extra-vars "r_ci_covr=standalone" r-ci.yml
+
 # Use raw to disable tag processing {% raw %}
 
 - name: Run the playbook to check the package
@@ -195,7 +206,17 @@
 
     - name: Run code coverage
       ansible.builtin.command:
-        cmd: Rscript -e "covr::codecov()"
+        cmd: >
+          Rscript
+          -e "library(covr)"
+          -e "targets <- c('azure', 'codecov', 'coveralls', 'gitlab', 'standalone')"
+          -e "target <- match.arg('{{ r_ci_covr }}', targets)"
+          -e "switch(target,"
+          -e "       azure = azure(),"
+          -e "       codecov = codecov(),"
+          -e "       coveralls = coveralls(),"
+          -e "       gitlab = gitlab(),"
+          -e "       standalone = report(file = 'covr.html'))"
         chdir: "{{ lookup('env', 'PWD') }}"
       changed_when: false
       become: false
