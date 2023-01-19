@@ -31,7 +31,7 @@
   tasks:
     - name: Check if R is installed
       ansible.builtin.command:
-        cmd: command -v R
+        cmd: R --version
       register: is_r_installed
       changed_when: false
       failed_when: false
