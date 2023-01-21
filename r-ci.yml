@@ -19,12 +19,6 @@
 # Example, run code coverage and output the result to 'covr.html':
 # ansible-playbook -i localhost, --extra-vars "r_ci_covr=standalone" r-ci.yml
 
-# Default is to check that the name of the current working directory
-# matches the package name. Set 'r_ci_cwd=false' to disable this
-# check.
-# Example:
-# ansible-playbook -i localhost, --extra-vars "r_ci_cwd=false" r-ci.yml
-
 # Use raw to disable tag processing {% raw %}
 
 - name: Run the playbook to check the package
@@ -32,7 +26,6 @@
   connection: local
   gather_facts: false
   vars:
-    r_ci_cwd: true
     r_ci_lintr: true
 
   tasks:
@@ -86,15 +79,6 @@
       register: pkg_name
       changed_when: false
       become: false
-
-    - name: Ensure the current working directory name and the package name matches
-      ansible.builtin.debug:
-        msg:
-          - "Package name: {{ pkg_name.stdout }}"
-          - "Current working directory: {{ lookup('env', 'PWD') | basename }}"
-      become: false
-      failed_when: pkg_name.stdout | string != lookup('env', 'PWD') | basename
-      when: r_ci_cwd | bool
 
     - name: Determine the package version from the DESCRIPTION file
       ansible.builtin.command:
