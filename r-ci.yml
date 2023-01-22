@@ -134,6 +134,7 @@
         chdir: "{{ lookup('env', 'PWD') }}"
       environment:
         _R_CHECK_CRAN_INCOMING_: "FALSE"
+        _R_CHECK_SYSTEM_CLOCK_: "FALSE"
       register: pkg_check
       changed_when: false
       failed_when: false
