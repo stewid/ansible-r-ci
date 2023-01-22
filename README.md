@@ -5,7 +5,7 @@ Run the playbook using: <br />
 ansible-playbook -i localhost, r-ci.yml
 ```
 
----
+### System requirements
 
 Use the `sysreqs` variable to specify a comma separated list of system
 requirements that must be present. <br />
@@ -14,7 +14,7 @@ Example: <br />
 ansible-playbook -i localhost, --extra-vars "sysreqs=gdal-devel,geos-devel,proj-devel,sqlite-devel" r-ci.yml
 ```
 
-## Code coverage
+### Code coverage
 
 Use the `r_ci_covr` variable to run covr on a package and specify the
 target for the code coverage report. <br />
