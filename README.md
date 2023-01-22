@@ -16,8 +16,9 @@ ansible-playbook -i localhost, --extra-vars "sysreqs=gdal-devel,geos-devel,proj-
 
 ### Static code analysis of R code
 
-Default is to run static code analysis of the R code using lintr.  Set
-`r_ci_lintr=false` to disable this check. <br />
+Default is to run static code analysis of the R code using
+[lintr](https://lintr.r-lib.org/).  Set `r_ci_lintr=false` to disable
+this check. <br />
 Example: <br />
 ```
 ansible-playbook -i localhost, --extra-vars "r_ci_lintr=false" r-ci.yml
@@ -25,8 +26,8 @@ ansible-playbook -i localhost, --extra-vars "r_ci_lintr=false" r-ci.yml
 
 ### Code coverage
 
-Use the `r_ci_covr` variable to run covr on a package and specify the
-target for the code coverage report. <br />
+Use the `r_ci_covr` variable to run [covr](https://covr.r-lib.org/) on
+a package and specify the target for the code coverage report. <br />
 Valid targets are: <br />
 - `azure`: output the result so it is available on Azure Pipelines
 - `codecov`: upload the result to codecov.io
