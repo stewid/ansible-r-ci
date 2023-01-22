@@ -14,6 +14,15 @@ Example: <br />
 ansible-playbook -i localhost, --extra-vars "sysreqs=gdal-devel,geos-devel,proj-devel,sqlite-devel" r-ci.yml
 ```
 
+### Static code analysis of R code
+
+Default is to run static code analysis of the R code using lintr.  Set
+`r_ci_lintr=false` to disable this check. <br />
+Example: <br />
+```
+ansible-playbook -i localhost, --extra-vars "r_ci_lintr=false" r-ci.yml
+```
+
 ### Code coverage
 
 Use the `r_ci_covr` variable to run covr on a package and specify the
