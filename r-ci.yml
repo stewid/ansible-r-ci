@@ -189,6 +189,13 @@
       become: false
       when: r_ci_lintr | bool and is_lintr_installed.stdout == "FALSE"
 
+    - name: Install package
+      ansible.builtin.command:
+        cmd: "R CMD INSTALL {{ pkg_name.stdout }}_{{ pkg_version.stdout }}.tar.gz"
+        chdir: "{{ lookup('env', 'PWD') }}"
+      become: false
+      when: r_ci_lintr | bool
+
     - name: Static code analysis of R code using lintr
       ansible.builtin.command:
         cmd: >
