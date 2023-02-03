@@ -29,7 +29,6 @@
 - name: Run the playbook to check the package
   hosts: localhost
   connection: local
-  gather_facts: false
   vars:
     r_ci_build_args: --no-build-vignettes --no-manual
     r_ci_check_args: --ignore-vignettes --no-manual --no-stop-on-test-error --as-cran
