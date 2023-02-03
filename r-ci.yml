@@ -57,7 +57,7 @@
       when: is_r_installed.rc != 0
 
     - name: Install system requirements
-      ansible.builtin.dnf:
+      ansible.builtin.package:
         name: "{{ sysreqs.split(',') }}"
         state: present
       become: true
