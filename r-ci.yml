@@ -55,6 +55,14 @@
       become: true
       when: is_r_installed.rc != 0
 
+    - name: Install the 'checkbashisms' script on Ubuntu
+      ansible.builtin.package:
+        name:
+          - devscripts
+        state: present
+      become: true
+      when: ansible_facts['distribution'] == "Ubuntu"
+
     - name: Install system requirements
       ansible.builtin.package:
         name: "{{ sysreqs.split(',') }}"
