@@ -146,7 +146,7 @@
 
     - name: Read the package install log
       ansible.builtin.command:
-        cmd: "cat {{ pkg_name.stdout }}.Rcheck/00install.out"
+        cmd: "[ -f {{ pkg_name.stdout }}.Rcheck/00install.out ] && cat {{ pkg_name.stdout }}.Rcheck/00install.out || echo ''"
         chdir: "{{ lookup('env', 'PWD') }}"
       register: pkg_install_log
       changed_when: false
