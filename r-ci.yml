@@ -155,7 +155,7 @@
     - name: Check if the package install log exists
       ansible.builtin.stat:
         path: "{{ lookup('env', 'PWD') }}/{{ pkg_name.stdout }}.Rcheck/00install.out"
-      register: pkg_install_out
+      register: pkg_install
       become: false
 
     - name: Read the package install log
@@ -165,13 +165,14 @@
       register: pkg_install_log
       changed_when: false
       become: false
-      when: pkg_install_out.stat.exists
+      when: pkg_install.stat.exists
 
     - name: Display the package install log
       ansible.builtin.debug:
         msg: "{{ pkg_install_log.stdout_lines }}"
       changed_when: false
       become: false
+      when: pkg_install.stat.exists
 
     - name: Read the package check log
       ansible.builtin.command:
