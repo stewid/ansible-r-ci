@@ -152,17 +152,20 @@
       failed_when: false
       become: false
 
+    - name: Check if the package install log exists
+      ansible.builtin.stat:
+        path: "{{ lookup('env', 'PWD') }}/{{ pkg_name.stdout }}.Rcheck/00install.out"
+      register: pkg_install_out
+      become: false
+
     - name: Read the package install log
       ansible.builtin.command:
-        cmd: >
-          if [[ -f "{{ pkg_name.stdout }}".Rcheck/00install.out ]]; then
-          cat "{{ pkg_name.stdout }}".Rcheck/00install.out
-          else echo ""
-          fi
+        cmd: cat "{{ pkg_name.stdout }}.Rcheck/00install.out"
         chdir: "{{ lookup('env', 'PWD') }}"
       register: pkg_install_log
       changed_when: false
       become: false
+      when: pkg_install_out.stat.exists
 
     - name: Display the package install log
       ansible.builtin.debug:
