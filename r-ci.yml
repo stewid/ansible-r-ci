@@ -177,8 +177,8 @@
     - name: Check if the package check log exists
       ansible.builtin.stat:
         path: "{{ lookup('env', 'PWD') }}/{{ pkg_name.stdout }}.Rcheck/00check.log"
-      register: pkg_check
-      failed_when: pkg_check.stat.exists == false
+      register: pkg_00check
+      failed_when: pkg_00check.stat.exists == false
       become: false
 
     - name: Read the package check log
@@ -188,14 +188,14 @@
       register: pkg_check_log
       changed_when: false
       become: false
-      when: pkg_check.stat.exists
+      when: pkg_00check.stat.exists
 
     - name: Display the package check log
       ansible.builtin.debug:
         msg: "{{ pkg_check_log.stdout_lines }}"
       failed_when: pkg_check.rc != 0 or "WARNING" in pkg_check_log.stdout
       become: false
-      when: pkg_check.stat.exists
+      when: pkg_00check.stat.exists
 
     - name: Check if lintr is installed
       ansible.builtin.command:
